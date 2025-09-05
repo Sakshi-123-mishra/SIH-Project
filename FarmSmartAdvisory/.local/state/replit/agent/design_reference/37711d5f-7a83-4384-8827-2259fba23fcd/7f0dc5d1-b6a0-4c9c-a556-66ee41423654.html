@@ -1,0 +1,994 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmWise - Smart Crop Advisory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(0 0% 100%);
+            --foreground: hsl(222.2 84% 4.9%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222.2 84% 4.9%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(222.2 84% 4.9%);
+            --primary: hsl(142.1 76.2% 36.3%);
+            --primary-foreground: hsl(355.7 100% 97.3%);
+            --secondary: hsl(210 40% 96%);
+            --secondary-foreground: hsl(222.2 84% 4.9%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(215.4 16.3% 46.9%);
+            --accent: hsl(142.1 76.2% 36.3%);
+            --accent-foreground: hsl(355.7 100% 97.3%);
+            --destructive: hsl(0 84.2% 60.2%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(214.3 31.8% 91.4%);
+            --input: hsl(214.3 31.8% 91.4%);
+            --ring: hsl(142.1 76.2% 36.3%);
+            --radius: 0.75rem;
+        }
+        
+        .dark {
+            --background: hsl(222.2 84% 4.9%);
+            --foreground: hsl(210 40% 98%);
+            --card: hsl(222.2 84% 4.9%);
+            --card-foreground: hsl(210 40% 98%);
+            --popover: hsl(222.2 84% 4.9%);
+            --popover-foreground: hsl(210 40% 98%);
+            --primary: hsl(142.1 70.6% 45.3%);
+            --primary-foreground: hsl(144.9 80.4% 10%);
+            --secondary: hsl(217.2 32.6% 17.5%);
+            --secondary-foreground: hsl(210 40% 98%);
+            --muted: hsl(217.2 32.6% 17.5%);
+            --muted-foreground: hsl(215 20.2% 65.1%);
+            --accent: hsl(142.1 70.6% 45.3%);
+            --accent-foreground: hsl(144.9 80.4% 10%);
+            --destructive: hsl(0 62.8% 30.6%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(217.2 32.6% 17.5%);
+            --input: hsl(217.2 32.6% 17.5%);
+            --ring: hsl(142.1 70.6% 45.3%);
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body class="bg-background text-foreground font-sans min-h-screen">
+    <!-- @COMPONENT: App [main application wrapper with state management] -->
+    <div id="app" class="min-h-screen bg-background">
+        
+        <!-- Language Selection Screen (Initial State) -->
+        <!-- @COMPONENT: LanguageSelection [handles language preference setup] -->
+        <div id="language-selection" class="screen min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col justify-center items-center p-4">
+            <div class="w-full max-w-md mx-auto text-center">
+                <!-- App Logo and Title -->
+                <div class="mb-8">
+                    <div class="w-20 h-20 bg-primary rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                        <i data-lucide="leaf" class="text-primary-foreground w-10 h-10"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-foreground mb-2" data-mock="true">FarmWise</h1>
+                    <p class="text-muted-foreground" data-mock="true">Smart Crop Advisory</p>
+                </div>
+                
+                <!-- Language Selection -->
+                <div class="bg-card rounded-lg border p-6 shadow-sm">
+                    <h2 class="text-lg font-semibold mb-4" data-mock="true">Choose Your Language</h2>
+                    <p class="text-sm text-muted-foreground mb-6" data-mock="true">अपनी भाषा चुनें</p>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- @MAP: languages.map(lang => ( -->
+                        <button class="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left" data-event="click:selectLanguage" data-bind="lang.name">
+                            <div class="font-medium" data-mock="true">English</div>
+                            <div class="text-sm text-muted-foreground" data-mock="true">English</div>
+                        </button>
+                        <button class="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                            <div class="font-medium" data-mock="true">हिन्दी</div>
+                            <div class="text-sm text-muted-foreground" data-mock="true">Hindi</div>
+                        </button>
+                        <button class="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                            <div class="font-medium" data-mock="true">বাংলা</div>
+                            <div class="text-sm text-muted-foreground" data-mock="true">Bengali</div>
+                        </button>
+                        <button class="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                            <div class="font-medium" data-mock="true">తెలుగు</div>
+                            <div class="text-sm text-muted-foreground" data-mock="true">Telugu</div>
+                        </button>
+                        <button class="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                            <div class="font-medium" data-mock="true">ಕನ್ನಡ</div>
+                            <div class="text-sm text-muted-foreground" data-mock="true">Kannada</div>
+                        </button>
+                        <button class="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                            <div class="font-medium" data-mock="true">தமிழ்</div>
+                            <div class="text-sm text-muted-foreground" data-mock="true">Tamil</div>
+                        </button>
+                        <!-- @END_MAP )) -->
+                    </div>
+                    
+                    <button class="w-full mt-6 bg-primary text-primary-foreground py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors" data-event="click:proceedToLogin">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LanguageSelection -->
+
+        <!-- Login Screen -->
+        <!-- @COMPONENT: LoginScreen [farmer authentication and registration] -->
+        <div id="login-screen" class="screen hidden min-h-screen bg-background">
+            <div class="container mx-auto px-4 py-8 max-w-md">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-primary rounded-xl mx-auto mb-4 flex items-center justify-center">
+                        <i data-lucide="leaf" class="text-primary-foreground w-8 h-8"></i>
+                    </div>
+                    <h1 class="text-xl font-bold" data-mock="true">Welcome to FarmWise</h1>
+                    <p class="text-muted-foreground" data-mock="true">Your Smart Farming Assistant</p>
+                </div>
+
+                <div class="bg-card rounded-lg border p-6 shadow-sm">
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-mock="true">Phone Number</label>
+                            <input type="tel" placeholder="+91 9876543210" class="w-full p-3 border border-input rounded-md bg-background" data-bind="farmer.phone" data-mock="true">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-mock="true">Name</label>
+                            <input type="text" placeholder="Enter your name" class="w-full p-3 border border-input rounded-md bg-background" data-bind="farmer.name" data-mock="true">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-mock="true">District</label>
+                            <select class="w-full p-3 border border-input rounded-md bg-background" data-bind="farmer.district">
+                                <option data-mock="true">Select District</option>
+                                <option data-mock="true">Nashik</option>
+                                <option data-mock="true">Pune</option>
+                                <option data-mock="true">Aurangabad</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors" data-event="click:loginFarmer">
+                            Continue to Dashboard
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <div class="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span data-mock="true">Your data is secure and stored locally</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LoginScreen -->
+
+        <!-- Main Dashboard -->
+        <!-- @COMPONENT: Dashboard [main application interface with navigation] -->
+        <div id="dashboard" class="screen hidden min-h-screen bg-background">
+            <!-- Top Header -->
+            <header class="bg-card border-b px-4 py-3">
+                <div class="container mx-auto flex items-center justify-between max-w-6xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <i data-lucide="leaf" class="text-primary-foreground w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-semibold" data-mock="true">FarmWise</h1>
+                            <p class="text-sm text-muted-foreground" data-bind="farmer.name" data-mock="true">Ramesh Kumar</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="p-2 hover:bg-accent hover:text-accent-foreground rounded-md" data-event="click:toggleVoice">
+                            <i data-lucide="volume-2" class="w-5 h-5"></i>
+                        </button>
+                        <button class="p-2 hover:bg-accent hover:text-accent-foreground rounded-md" data-event="click:openSettings">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                        </button>
+                        <!-- Offline Status Indicator -->
+                        <div class="flex items-center space-x-1 px-2 py-1 bg-muted rounded-full" data-implementation="Show online/offline status">
+                            <div class="w-2 h-2 bg-primary rounded-full" data-mock="true"></div>
+                            <span class="text-xs text-muted-foreground" data-mock="true">Online</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab Navigation -->
+            <nav class="bg-card border-b">
+                <div class="container mx-auto max-w-6xl px-4">
+                    <div class="flex space-x-0">
+                        <button class="tab-button active px-6 py-4 font-medium border-b-2 border-primary text-primary" data-tab="crop-recommendation">
+                            Crop Recommendation
+                        </button>
+                        <button class="tab-button px-6 py-4 font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground" data-tab="yield-prediction">
+                            Yield Prediction
+                        </button>
+                        <button class="tab-button px-6 py-4 font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground" data-tab="history">
+                            History
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="container mx-auto max-w-6xl px-4 py-6">
+                
+                <!-- Crop Recommendation Tab -->
+                <!-- @COMPONENT: CropRecommendation [soil data input and crop prediction] -->
+                <div id="crop-recommendation" class="tab-content">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Soil Data Input Form -->
+                        <div class="bg-card rounded-lg border p-6 shadow-sm">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <i data-lucide="map-pin" class="text-primary w-5 h-5"></i>
+                                <h2 class="text-lg font-semibold" data-mock="true">Soil & Climate Data</h2>
+                            </div>
+                            
+                            <form class="space-y-4" data-implementation="Integrate with crop_model_inference.py CropRecommendationPredictor">
+                                <!-- Soil Health Card Section -->
+                                <div class="p-4 bg-accent/10 rounded-md">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-sm font-medium" data-mock="true">Do you have a Soil Health Card?</span>
+                                        <div class="flex space-x-2">
+                                            <button type="button" class="px-3 py-1 text-xs bg-primary text-primary-foreground rounded-full" data-event="click:toggleSHC">Yes</button>
+                                            <button type="button" class="px-3 py-1 text-xs border rounded-full" data-event="click:toggleSHC">No</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-muted-foreground" data-mock="true">We'll auto-fill soil data from your district if you don't have SHC</p>
+                                </div>
+
+                                <!-- NPK Values -->
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1" data-mock="true">Nitrogen (N)</label>
+                                        <input type="number" placeholder="0-140" min="0" max="140" class="w-full p-3 border border-input rounded-md bg-background text-center" data-bind="soilData.N" data-mock="true">
+                                        <span class="text-xs text-muted-foreground" data-mock="true">kg/ha</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1" data-mock="true">Phosphorus (P)</label>
+                                        <input type="number" placeholder="5-145" min="5" max="145" class="w-full p-3 border border-input rounded-md bg-background text-center" data-bind="soilData.P" data-mock="true">
+                                        <span class="text-xs text-muted-foreground" data-mock="true">kg/ha</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1" data-mock="true">Potassium (K)</label>
+                                        <input type="number" placeholder="5-205" min="5" max="205" class="w-full p-3 border border-input rounded-md bg-background text-center" data-bind="soilData.K" data-mock="true">
+                                        <span class="text-xs text-muted-foreground" data-mock="true">kg/ha</span>
+                                    </div>
+                                </div>
+
+                                <!-- pH -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" data-mock="true">pH Level</label>
+                                    <input type="number" placeholder="3.5-9.9" min="3.5" max="9.9" step="0.1" class="w-full p-3 border border-input rounded-md bg-background" data-bind="soilData.ph" data-mock="true">
+                                </div>
+
+                                <!-- Weather Data (Auto-fetched) -->
+                                <div class="p-4 bg-muted/50 rounded-md">
+                                    <div class="flex items-center space-x-2 mb-3">
+                                        <i data-lucide="cloud" class="text-primary w-4 h-4"></i>
+                                        <span class="text-sm font-medium" data-mock="true">Weather Data (Auto-fetched)</span>
+                                        <button type="button" class="ml-auto text-xs text-primary" data-event="click:refreshWeather">Refresh</button>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-3 gap-3 text-sm">
+                                        <div>
+                                            <span class="text-muted-foreground" data-mock="true">Temperature</span>
+                                            <div class="font-medium" data-bind="weather.temperature" data-mock="true">28°C</div>
+                                        </div>
+                                        <div>
+                                            <span class="text-muted-foreground" data-mock="true">Humidity</span>
+                                            <div class="font-medium" data-bind="weather.humidity" data-mock="true">65%</div>
+                                        </div>
+                                        <div>
+                                            <span class="text-muted-foreground" data-mock="true">Rainfall</span>
+                                            <div class="font-medium" data-bind="weather.rainfall" data-mock="true">450mm</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
+                                    <i data-lucide="map-pin" class="text-primary w-4 h-4"></i>
+                                    <span class="text-sm" data-bind="farmer.location" data-mock="true">Nashik, Maharashtra</span>
+                                    <button type="button" class="ml-auto text-xs text-primary" data-event="click:detectLocation">Auto-detect</button>
+                                </div>
+
+                                <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors flex items-center justify-center space-x-2" data-event="click:predictCrop">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                    <span data-mock="true">Get Crop Recommendation</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Prediction Results -->
+                        <div class="bg-card rounded-lg border p-6 shadow-sm">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <i data-lucide="target" class="text-primary w-5 h-5"></i>
+                                <h2 class="text-lg font-semibold" data-mock="true">Recommendation Results</h2>
+                                <button class="ml-auto p-1 hover:bg-accent hover:text-accent-foreground rounded" data-event="click:speakResult">
+                                    <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Main Recommendation -->
+                            <div class="text-center mb-6">
+                                <!-- Beautiful large crop illustration -->
+                                <div class="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+                                    <i data-lucide="wheat" class="text-primary-foreground w-12 h-12"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-primary mb-2" data-bind="prediction.crop" data-mock="true">Rice</h3>
+                                <div class="flex items-center justify-center space-x-2 mb-2">
+                                    <span class="text-sm text-muted-foreground" data-mock="true">Confidence:</span>
+                                    <span class="font-semibold text-lg" data-bind="prediction.confidence" data-mock="true">95.2%</span>
+                                </div>
+                                <!-- Confidence Bar -->
+                                <div class="w-full bg-muted rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 95.2%" data-bind="prediction.confidenceWidth"></div>
+                                </div>
+                            </div>
+
+                            <!-- Alternative Crops -->
+                            <div class="mb-6">
+                                <h4 class="text-sm font-medium mb-3" data-mock="true">Alternative Recommendations</h4>
+                                <div class="space-y-2">
+                                    <!-- @MAP: alternatives.map(alt => ( -->
+                                    <div class="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+                                        <span class="text-sm" data-bind="alt.crop" data-mock="true">Maize</span>
+                                        <span class="text-sm font-medium" data-bind="alt.confidence" data-mock="true">3.1%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+                                        <span class="text-sm" data-bind="alt.crop" data-mock="true">Wheat</span>
+                                        <span class="text-sm font-medium" data-bind="alt.confidence" data-mock="true">1.7%</span>
+                                    </div>
+                                    <!-- @END_MAP )) -->
+                                </div>
+                            </div>
+
+                            <!-- Advisory Tips -->
+                            <div class="space-y-3">
+                                <h4 class="text-sm font-medium flex items-center space-x-2">
+                                    <i data-lucide="lightbulb" class="w-4 h-4 text-primary"></i>
+                                    <span data-mock="true">Smart Advisory</span>
+                                </h4>
+                                
+                                <!-- @MAP: advisoryTips.map(tip => ( -->
+                                <div class="p-3 bg-accent/10 rounded-md border-l-4 border-primary">
+                                    <div class="flex items-start space-x-2">
+                                        <i data-lucide="droplets" class="w-4 h-4 text-primary mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-medium text-sm" data-mock="true">Irrigation</h5>
+                                            <p class="text-xs text-muted-foreground" data-mock="true">Apply 150mm water per week during flowering stage</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 bg-accent/10 rounded-md border-l-4 border-accent">
+                                    <div class="flex items-start space-x-2">
+                                        <i data-lucide="beaker" class="w-4 h-4 text-accent mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-medium text-sm" data-mock="true">Fertilizer</h5>
+                                            <p class="text-xs text-muted-foreground" data-mock="true">Add 10kg Urea + 5kg DAP per acre in 2 splits</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 bg-accent/10 rounded-md border-l-4 border-orange-500">
+                                    <div class="flex items-start space-x-2">
+                                        <i data-lucide="bug" class="w-4 h-4 text-orange-500 mt-0.5"></i>
+                                        <div>
+                                            <h5 class="font-medium text-sm" data-mock="true">Pest Control</h5>
+                                            <p class="text-xs text-muted-foreground" data-mock="true">Monitor for stem borer. Apply neem oil if needed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: CropRecommendation -->
+
+                <!-- Yield Prediction Tab -->
+                <!-- @COMPONENT: YieldPrediction [crop yield estimation interface] -->
+                <div id="yield-prediction" class="tab-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Yield Prediction Form -->
+                        <div class="bg-card rounded-lg border p-6 shadow-sm">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <i data-lucide="bar-chart-3" class="text-primary w-5 h-5"></i>
+                                <h2 class="text-lg font-semibold" data-mock="true">Yield Prediction</h2>
+                            </div>
+                            
+                            <form class="space-y-4" data-implementation="Integrate with CropYieldPredictor">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2" data-mock="true">Crop Type</label>
+                                    <select class="w-full p-3 border border-input rounded-md bg-background" data-bind="yieldData.crop">
+                                        <option data-mock="true">Select Crop</option>
+                                        <option data-mock="true">Rice</option>
+                                        <option data-mock="true">Wheat</option>
+                                        <option data-mock="true">Maize</option>
+                                        <option data-mock="true">Sugarcane</option>
+                                        <option data-mock="true">Cotton</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2" data-mock="true">Season</label>
+                                    <select class="w-full p-3 border border-input rounded-md bg-background" data-bind="yieldData.season">
+                                        <option data-mock="true">Kharif (June-November)</option>
+                                        <option data-mock="true">Rabi (November-April)</option>
+                                        <option data-mock="true">Summer (April-June)</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2" data-mock="true">Crop Area</label>
+                                    <input type="number" placeholder="Enter area in hectares" class="w-full p-3 border border-input rounded-md bg-background" data-bind="yieldData.area" data-mock="true">
+                                    <span class="text-xs text-muted-foreground" data-mock="true">hectares</span>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2" data-mock="true">Crop Year</label>
+                                    <select class="w-full p-3 border border-input rounded-md bg-background" data-bind="yieldData.year">
+                                        <option data-mock="true">2024</option>
+                                        <option data-mock="true">2023</option>
+                                        <option data-mock="true">2022</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="w-full bg-primary text-primary-foreground py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors flex items-center justify-center space-x-2" data-event="click:predictYield">
+                                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                    <span data-mock="true">Predict Yield</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Yield Results -->
+                        <div class="bg-card rounded-lg border p-6 shadow-sm">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <i data-lucide="harvest" class="text-primary w-5 h-5"></i>
+                                <h2 class="text-lg font-semibold" data-mock="true">Yield Forecast</h2>
+                            </div>
+                            
+                            <!-- Yield Statistics -->
+                            <div class="space-y-4">
+                                <div class="text-center p-6 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg">
+                                    <div class="text-3xl font-bold text-primary mb-1" data-bind="yieldPrediction.totalProduction" data-mock="true">6.25</div>
+                                    <div class="text-sm text-muted-foreground" data-mock="true">Tons Expected Production</div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="text-center p-4 bg-muted/50 rounded-md">
+                                        <div class="text-xl font-semibold" data-bind="yieldPrediction.yieldPerHectare" data-mock="true">2.5</div>
+                                        <div class="text-xs text-muted-foreground" data-mock="true">Tons per Hectare</div>
+                                    </div>
+                                    <div class="text-center p-4 bg-muted/50 rounded-md">
+                                        <div class="text-xl font-semibold" data-bind="yieldPrediction.area" data-mock="true">2.5</div>
+                                        <div class="text-xs text-muted-foreground" data-mock="true">Hectares Area</div>
+                                    </div>
+                                </div>
+
+                                <!-- Yield Factors -->
+                                <div class="space-y-3">
+                                    <h4 class="text-sm font-medium" data-mock="true">Yield Influencing Factors</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm" data-mock="true">Soil Quality</span>
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-20 h-2 bg-muted rounded-full">
+                                                    <div class="w-16 h-2 bg-primary rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs font-medium" data-mock="true">Good</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm" data-mock="true">Weather Conditions</span>
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-20 h-2 bg-muted rounded-full">
+                                                    <div class="w-18 h-2 bg-accent rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs font-medium" data-mock="true">Excellent</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm" data-mock="true">Seasonal Timing</span>
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-20 h-2 bg-muted rounded-full">
+                                                    <div class="w-14 h-2 bg-orange-500 rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs font-medium" data-mock="true">Average</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: YieldPrediction -->
+
+                <!-- History Tab -->
+                <!-- @COMPONENT: PredictionHistory [historical predictions and analytics] -->
+                <div id="history" class="tab-content hidden">
+                    <div class="bg-card rounded-lg border p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="clock" class="text-primary w-5 h-5"></i>
+                                <h2 class="text-lg font-semibold" data-mock="true">Prediction History</h2>
+                            </div>
+                            <button class="text-sm text-primary hover:underline" data-event="click:exportHistory">
+                                Export Data
+                            </button>
+                        </div>
+                        
+                        <!-- History Cards -->
+                        <div class="space-y-4">
+                            <!-- @MAP: predictions.map(prediction => ( -->
+                            <div class="border rounded-lg p-4 hover:bg-accent/5 transition-colors">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="wheat" class="w-5 h-5 text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium" data-bind="prediction.crop" data-mock="true">Rice</h3>
+                                            <p class="text-sm text-muted-foreground" data-bind="prediction.date" data-mock="true">2 days ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-semibold" data-bind="prediction.confidence" data-mock="true">95.2%</div>
+                                        <div class="text-sm text-muted-foreground" data-mock="true">Confidence</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-4 mt-3 pt-3 border-t text-sm">
+                                    <div>
+                                        <span class="text-muted-foreground" data-mock="true">Season</span>
+                                        <div data-bind="prediction.season" data-mock="true">Kharif</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted-foreground" data-mock="true">Area</span>
+                                        <div data-bind="prediction.area" data-mock="true">2.5 ha</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted-foreground" data-mock="true">Expected Yield</span>
+                                        <div data-bind="prediction.expectedYield" data-mock="true">6.25 tons</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border rounded-lg p-4 hover:bg-accent/5 transition-colors">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="corn" class="w-5 h-5 text-accent"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium" data-mock="true">Maize</h3>
+                                            <p class="text-sm text-muted-foreground" data-mock="true">1 week ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-semibold" data-mock="true">87.4%</div>
+                                        <div class="text-sm text-muted-foreground" data-mock="true">Confidence</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+
+                        <!-- No History State -->
+                        <div class="hidden text-center py-12" id="no-history">
+                            <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="clock" class="w-8 h-8 text-muted-foreground"></i>
+                            </div>
+                            <h3 class="font-medium mb-2" data-mock="true">No Predictions Yet</h3>
+                            <p class="text-sm text-muted-foreground mb-4" data-mock="true">Start by getting your first crop recommendation</p>
+                            <button class="bg-primary text-primary-foreground py-2 px-4 rounded-md font-medium" data-event="click:goToPrediction">
+                                Make Prediction
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: PredictionHistory -->
+            </main>
+
+            <!-- Bottom Navigation (Mobile) -->
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t">
+                <div class="flex">
+                    <button class="nav-item flex-1 py-3 px-4 text-center hover:bg-accent/10 transition-colors" data-tab="crop-recommendation">
+                        <i data-lucide="target" class="w-5 h-5 mx-auto mb-1 text-primary"></i>
+                        <div class="text-xs font-medium" data-mock="true">Recommend</div>
+                    </button>
+                    <button class="nav-item flex-1 py-3 px-4 text-center hover:bg-accent/10 transition-colors" data-tab="yield-prediction">
+                        <i data-lucide="trending-up" class="w-5 h-5 mx-auto mb-1 text-muted-foreground"></i>
+                        <div class="text-xs text-muted-foreground" data-mock="true">Yield</div>
+                    </button>
+                    <button class="nav-item flex-1 py-3 px-4 text-center hover:bg-accent/10 transition-colors" data-tab="history">
+                        <i data-lucide="clock" class="w-5 h-5 mx-auto mb-1 text-muted-foreground"></i>
+                        <div class="text-xs text-muted-foreground" data-mock="true">History</div>
+                    </button>
+                    <button class="nav-item flex-1 py-3 px-4 text-center hover:bg-accent/10 transition-colors" data-event="click:openSettings">
+                        <i data-lucide="settings" class="w-5 h-5 mx-auto mb-1 text-muted-foreground"></i>
+                        <div class="text-xs text-muted-foreground" data-mock="true">Settings</div>
+                    </button>
+                </div>
+            </nav>
+        </div>
+        <!-- @END_COMPONENT: Dashboard -->
+
+        <!-- Settings Modal -->
+        <!-- @COMPONENT: SettingsModal [user preferences and app configuration] -->
+        <div id="settings-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-card rounded-lg border p-6 w-full max-w-md shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold" data-mock="true">Settings</h2>
+                    <button class="p-1 hover:bg-accent hover:text-accent-foreground rounded" data-event="click:closeSettings">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Voice Settings -->
+                    <div>
+                        <h3 class="text-sm font-medium mb-3" data-mock="true">Voice Assistant</h3>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm" data-mock="true">Voice Output</span>
+                            <button class="w-11 h-6 bg-primary rounded-full relative transition-colors" data-event="click:toggleVoice" data-implementation="Toggle voice settings">
+                                <div class="w-4 h-4 bg-white rounded-full absolute top-1 right-1 transition-transform"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Language Settings -->
+                    <div>
+                        <h3 class="text-sm font-medium mb-3" data-mock="true">Language Preference</h3>
+                        <select class="w-full p-3 border border-input rounded-md bg-background" data-bind="settings.language">
+                            <option data-mock="true">English</option>
+                            <option data-mock="true">हिन्दी (Hindi)</option>
+                            <option data-mock="true">বাংলা (Bengali)</option>
+                            <option data-mock="true">తెలుగు (Telugu)</option>
+                        </select>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div>
+                        <h3 class="text-sm font-medium mb-3" data-mock="true">Data Management</h3>
+                        <div class="space-y-2">
+                            <button class="w-full text-left p-3 border rounded-md hover:bg-accent/10 transition-colors" data-event="click:clearOfflineData">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="trash-2" class="w-4 h-4 text-muted-foreground"></i>
+                                    <div>
+                                        <div class="text-sm font-medium" data-mock="true">Clear Offline Data</div>
+                                        <div class="text-xs text-muted-foreground" data-mock="true">Remove cached predictions</div>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="w-full text-left p-3 border rounded-md hover:bg-accent/10 transition-colors" data-event="click:exportData">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="download" class="w-4 h-4 text-muted-foreground"></i>
+                                    <div>
+                                        <div class="text-sm font-medium" data-mock="true">Export Data</div>
+                                        <div class="text-xs text-muted-foreground" data-mock="true">Download prediction history</div>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- App Info -->
+                    <div class="pt-4 border-t text-center">
+                        <p class="text-xs text-muted-foreground" data-mock="true">FarmWise v1.0.0</p>
+                        <p class="text-xs text-muted-foreground" data-mock="true">ML Model Accuracy: 99.45%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SettingsModal -->
+
+        <!-- Loading Overlay -->
+        <!-- @COMPONENT: LoadingOverlay [prediction processing state] -->
+        <div id="loading-overlay" class="fixed inset-0 bg-black/50 hidden z-40 flex items-center justify-center">
+            <div class="bg-card rounded-lg border p-8 text-center shadow-xl">
+                <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                <h3 class="font-medium mb-2" data-mock="true">Analyzing Your Farm Data</h3>
+                <p class="text-sm text-muted-foreground" data-mock="true">Our AI is processing soil and weather conditions...</p>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LoadingOverlay -->
+    </div>
+    <!-- @END_COMPONENT: App -->
+
+    <!-- Success Notification -->
+    <!-- @COMPONENT: SuccessToast [feedback for user actions] -->
+    <div id="success-toast" class="fixed top-4 right-4 bg-primary text-primary-foreground p-4 rounded-lg shadow-lg hidden z-50 max-w-sm">
+        <div class="flex items-start space-x-3">
+            <i data-lucide="check-circle" class="w-5 h-5 mt-0.5"></i>
+            <div>
+                <div class="font-medium" data-mock="true">Prediction Successful!</div>
+                <div class="text-sm opacity-90" data-mock="true">Crop recommendation has been generated</div>
+            </div>
+            <button class="ml-auto" data-event="click:closeToast">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: SuccessToast -->
+
+    <!-- Install PWA Prompt -->
+    <!-- @COMPONENT: InstallPrompt [PWA installation guidance] -->
+    <div id="install-prompt" class="fixed bottom-20 md:bottom-4 left-4 right-4 bg-card border rounded-lg p-4 shadow-lg hidden">
+        <div class="flex items-start space-x-3">
+            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                <i data-lucide="smartphone" class="w-5 h-5 text-primary-foreground"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-medium mb-1" data-mock="true">Install FarmWise App</h3>
+                <p class="text-sm text-muted-foreground" data-mock="true">Get faster access and work offline</p>
+            </div>
+            <div class="flex space-x-2">
+                <button class="text-sm text-muted-foreground hover:text-foreground" data-event="click:dismissInstall">
+                    Later
+                </button>
+                <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-sm font-medium hover:bg-primary/90" data-event="click:installApp">
+                    Install
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: InstallPrompt -->
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Tab switching functionality
+        (function() {
+            // TODO: Implement state management for React conversion
+            const tabButtons = document.querySelectorAll('[data-tab]');
+            const navItems = document.querySelectorAll('.nav-item[data-tab]');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            function switchTab(targetTab) {
+                // Hide all tab contents
+                tabContents.forEach(content => content.classList.add('hidden'));
+                
+                // Remove active state from all tab buttons
+                tabButtons.forEach(button => {
+                    button.classList.remove('border-primary', 'text-primary');
+                    button.classList.add('border-transparent', 'text-muted-foreground');
+                });
+                
+                // Remove active state from nav items
+                navItems.forEach(item => {
+                    const icon = item.querySelector('i');
+                    const text = item.querySelector('.text-xs');
+                    icon.classList.remove('text-primary');
+                    icon.classList.add('text-muted-foreground');
+                    text.classList.remove('text-foreground');
+                    text.classList.add('text-muted-foreground');
+                });
+                
+                // Show target tab content
+                const targetContent = document.getElementById(targetTab);
+                if (targetContent) {
+                    targetContent.classList.remove('hidden');
+                }
+                
+                // Activate target tab button
+                const targetButton = document.querySelector(`[data-tab="${targetTab}"]`);
+                if (targetButton) {
+                    targetButton.classList.add('border-primary', 'text-primary');
+                    targetButton.classList.remove('border-transparent', 'text-muted-foreground');
+                    
+                    // If it's a nav item, also update the icon/text
+                    if (targetButton.classList.contains('nav-item')) {
+                        const icon = targetButton.querySelector('i');
+                        const text = targetButton.querySelector('.text-xs');
+                        icon.classList.add('text-primary');
+                        icon.classList.remove('text-muted-foreground');
+                        text.classList.add('text-foreground');
+                        text.classList.remove('text-muted-foreground');
+                    }
+                }
+            }
+            
+            // Add click listeners to tab buttons
+            [...tabButtons, ...navItems].forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.getAttribute('data-tab');
+                    if (targetTab) {
+                        switchTab(targetTab);
+                    }
+                });
+            });
+        })();
+
+        // Screen navigation
+        (function() {
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.add('hidden');
+                });
+                document.getElementById(screenId).classList.remove('hidden');
+            }
+            
+            // Language selection to login
+            document.querySelector('[data-event="click:proceedToLogin"]').addEventListener('click', () => {
+                showScreen('login-screen');
+            });
+            
+            // Login to dashboard
+            document.querySelector('[data-event="click:loginFarmer"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                showScreen('dashboard');
+            });
+        })();
+
+        // Modal management
+        (function() {
+            const settingsModal = document.getElementById('settings-modal');
+            
+            document.querySelectorAll('[data-event="click:openSettings"]').forEach(button => {
+                button.addEventListener('click', () => {
+                    settingsModal.classList.remove('hidden');
+                });
+            });
+            
+            document.querySelector('[data-event="click:closeSettings"]').addEventListener('click', () => {
+                settingsModal.classList.add('hidden');
+            });
+        })();
+
+        // Form submissions (placeholder for ML integration)
+        (function() {
+            document.querySelector('[data-event="click:predictCrop"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                // TODO: Integrate with crop_model_inference.py CropRecommendationPredictor
+                // TODO: Call FastAPI backend /predict endpoint
+                // Show loading
+                document.getElementById('loading-overlay').classList.remove('hidden');
+                
+                // Simulate API call
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    document.getElementById('success-toast').classList.remove('hidden');
+                    
+                    // Hide toast after 3 seconds
+                    setTimeout(() => {
+                        document.getElementById('success-toast').classList.add('hidden');
+                    }, 3000);
+                }, 2000);
+            });
+            
+            document.querySelector('[data-event="click:predictYield"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                // TODO: Integrate with CropYieldPredictor
+                // TODO: Call FastAPI backend /predict-yield endpoint
+                console.log('Yield prediction requested');
+            });
+        })();
+
+        // Voice functionality placeholder
+        (function() {
+            let voiceEnabled = true;
+            
+            document.querySelectorAll('[data-event="click:toggleVoice"]').forEach(button => {
+                button.addEventListener('click', () => {
+                    voiceEnabled = !voiceEnabled;
+                    // TODO: Implement Web Speech API integration
+                    console.log('Voice toggled:', voiceEnabled);
+                });
+            });
+            
+            document.querySelector('[data-event="click:speakResult"]').addEventListener('click', () => {
+                // TODO: Implement text-to-speech for prediction results
+                console.log('Speaking prediction results...');
+            });
+        })();
+
+        // Geolocation placeholder
+        document.querySelector('[data-event="click:detectLocation"]').addEventListener('click', () => {
+            // TODO: Implement browser geolocation API
+            console.log('Detecting location...');
+        });
+
+        // Weather refresh placeholder
+        document.querySelector('[data-event="click:refreshWeather"]').addEventListener('click', () => {
+            // TODO: Implement weather API integration (OpenWeather/IMD)
+            console.log('Refreshing weather data...');
+        });
+
+        // PWA install prompt
+        document.querySelector('[data-event="click:installApp"]').addEventListener('click', () => {
+            // TODO: Implement PWA installation prompt
+            console.log('Installing PWA...');
+            document.getElementById('install-prompt').classList.add('hidden');
+        });
+
+        document.querySelector('[data-event="click:dismissInstall"]').addEventListener('click', () => {
+            document.getElementById('install-prompt').classList.add('hidden');
+        });
+
+        // Show install prompt (simulate)
+        setTimeout(() => {
+            document.getElementById('install-prompt').classList.remove('hidden');
+        }, 5000);
+
+        // Toast close functionality
+        document.querySelector('[data-event="click:closeToast"]').addEventListener('click', () => {
+            document.getElementById('success-toast').classList.add('hidden');
+        });
+
+        // Start with language selection screen
+        document.getElementById('language-selection').classList.remove('hidden');
+
+        // Service Worker registration (placeholder)
+        if ('serviceWorker' in navigator) {
+            // TODO: Register service worker for offline functionality
+            console.log('Service Worker supported');
+        }
+
+        // IndexedDB setup (placeholder)
+        // TODO: Implement IndexedDB for offline data storage
+        // - Store farmer profiles
+        // - Cache prediction results
+        // - Store soil and weather data
+        
+        console.log('FarmWise PWA loaded successfully');
+        console.log('Ready for ML model integration with provided models:');
+        console.log('- RandomForest Crop Recommendation (99.45% accuracy)');
+        console.log('- DecisionTree Yield Prediction (59% R² score)');
+    </script>
+</body>
+</html>
